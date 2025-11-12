@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selector de Autos</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Estilos mínimos para asegurar visibilidad */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .selector {
+      margin-bottom: 20px;
+    }
+    select {
+      margin-right: 10px;
+      padding: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .resultado {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Buscador de Filtros</h1>
+
+  <div class="selector">
+    <label for="marca">Marca:</label>
+    <select id="marca">
+      <option value="">Seleccione una marca</option>
+    </select>
+
+    <label for="modelo">Modelo:</label>
+    <select id="modelo" disabled>
+      <option value="">Seleccione un modelo</option>
+    </select>
+
+    <label for="motor">Motor:</label>
+    <select id="motor" disabled>
+      <option value="">Seleccione un motor</option>
+    </select>
+  </div>
+
+  <div id="resultado" class="resultado"></div>
+
+  <!-- Librería PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- Tu script principal -->
+  <script src="index.js"></script>
+</body>
+</html>

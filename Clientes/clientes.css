@@ -41,6 +41,14 @@ body {
     gap: 15px; /* Espacio entre los campos */
 }
 
+/* Acciones del formulario (contiene el botón) alineadas a la derecha */
+.form-actions {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
 .campo {
     flex: 1 1 calc(50% - 15px); /* Ocupa casi la mitad del ancho */
     display: flex;
@@ -64,7 +72,6 @@ input[type="text"], input[type="tel"], input[type="email"], input[type="number"]
     width: 100%;
     box-sizing: border-box; /* Incluye padding y borde en el ancho total */
 }
-
 
 /* 2. CONTENEDOR INFERIOR: LOS 2 CUADRADOS/RECTÁNGULOS */
 .contenedor-inferior {
@@ -95,9 +102,9 @@ input[type="text"], input[type="tel"], input[type="email"], input[type="number"]
     background-color: #e6ffe6;
     border: 1px solid #b3ffb3;
     display: flex;
-    flex-direction: column;
-    align-items: center; /* Centrar el contenido */
-    justify-content: center; /* Centrar verticalmente */
+    flex-direction: row; /* Título a la izquierda, botón a la derecha */
+    align-items: center;
+    justify-content: space-between;
 }
 
 .seccion-adicional h3 {
@@ -114,16 +121,47 @@ input[type="text"], input[type="tel"], input[type="email"], input[type="number"]
     font-size: 1.1em;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    margin-left: auto; /* Empuja el botón hacia la derecha */
 }
 
 #btn-guardar:hover {
     background-color: #45a049;
 }
 
+/* Listado de clientes */
+.lista-clientes {
+    margin-top: 20px;
+}
+
+.tabla-clientes {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.tabla-clientes th, .tabla-clientes td {
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.tabla-clientes thead th {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #111827;
+}
+
+.tabla-clientes tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
 /* Media Query para pantallas pequeñas */
 @media (max-width: 768px) {
     .campo {
         flex: 1 1 100%; /* Todos los campos a ancho completo en móviles */
+    }
+    .form-actions { 
+        justify-content: stretch; 
     }
     .contenedor-inferior {
         flex-direction: column; /* Apila las secciones inferiores en móviles */

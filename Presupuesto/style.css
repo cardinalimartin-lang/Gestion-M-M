@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 40px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+}
+
+.selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+select {
+  padding: 5px;
+}
+
+.resultado {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  border-bottom: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}
+
+h3 {
+  margin-top: 30px;
+  text-align: center;
+}

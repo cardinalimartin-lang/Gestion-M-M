@@ -1,0 +1,123 @@
+[2025-10-30T21:24:47.783Z] Iniciando servidor PID=13812
+[2025-10-30T21:24:47.799Z] Servidor escuchando en 3000
+[2025-10-30T21:25:43.491Z] Iniciando servidor PID=13608
+[2025-10-30T21:25:43.507Z] Servidor escuchando en 3000
+[2025-10-30T21:43:41.053Z] Iniciando servidor PID=5912
+[2025-10-30T21:43:41.057Z] Created users csv at C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\usuarios.csv
+[2025-10-30T21:43:41.068Z] uncaughtException: Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[2025-10-31T03:15:23.840Z] Iniciando servidor PID=3224
+[2025-10-31T03:15:23.882Z] Servidor escuchando en 3000
+[2025-10-31T03:24:54.223Z] Iniciando servidor PID=5816
+[2025-10-31T03:24:54.226Z] Added default users: admin,Admin123,Mateo,Mateo,Dario,Dario
+[2025-10-31T03:24:54.256Z] uncaughtException: Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[2025-10-31T04:09:19.898Z] Iniciando servidor PID=13720
+[2025-10-31T04:09:19.902Z] Added default users: Martin,Martin,Mateo,Mateo,Dario,Dario
+[2025-10-31T04:09:19.914Z] uncaughtException: Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[2025-10-31T04:18:52.043Z] Iniciando servidor PID=17612
+[2025-10-31T04:18:52.048Z] Added default users: Martin,Martin
+[2025-10-31T04:18:52.061Z] Servidor escuchando en 3000
+[2025-10-31T04:22:18.969Z] Iniciando servidor PID=7204
+[2025-10-31T04:22:19.618Z] Converted plain passwords to bcrypt hashes in usuarios.csv
+[2025-10-31T04:22:19.646Z] Servidor escuchando en 3000
+[2025-10-31T04:24:27.343Z] Iniciando servidor PID=14468
+[2025-10-31T04:24:27.348Z] Added default users: Martin,Martin,Mateo,Mateo,Dario,Dario
+[2025-10-31T04:24:27.693Z] Converted plain passwords to bcrypt hashes in usuarios.csv
+[2025-10-31T04:24:27.724Z] Servidor escuchando en 3000
+[2025-10-31T04:33:53.196Z] Iniciando servidor PID=16828
+[2025-10-31T04:33:53.212Z] Servidor escuchando en 3000
+[2025-10-31T06:12:14.150Z] Iniciando servidor PID=9988
+[2025-10-31T06:12:14.172Z] Servidor escuchando en 3000
+[2025-10-31T06:23:45.706Z] Iniciando servidor PID=15764
+[2025-10-31T06:23:45.735Z] Servidor escuchando en 3000
+[2025-10-31T06:29:50.008Z] uncaughtException: Error: Unexpected Error: column header mismatch expected: 8 columns got: 15
+    at HeaderTransformer.processRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:66:23)
+    at HeaderTransformer.transform (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:33:30)
+    at CsvParserStream.transformRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:139:36)
+    at iterate (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:118:25)
+    at CsvParserStream.processRows (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:135:9)
+    at CsvParserStream._flush (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:76:25)
+    at CsvParserStream.final [as _final] (node:internal/streams/transform:128:10)
+    at prefinish (node:internal/streams/writable:916:14)
+    at finishMaybe (node:internal/streams/writable:930:5)
+    at Writable.end (node:internal/streams/writable:845:5)
+[2025-10-31T06:30:07.323Z] uncaughtException: Error: Unexpected Error: column header mismatch expected: 8 columns got: 15
+    at HeaderTransformer.processRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:66:23)
+    at HeaderTransformer.transform (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:33:30)
+    at CsvParserStream.transformRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:139:36)
+    at iterate (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:118:25)
+    at CsvParserStream.processRows (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:135:9)
+    at CsvParserStream._flush (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:76:25)
+    at CsvParserStream.final [as _final] (node:internal/streams/transform:128:10)
+    at prefinish (node:internal/streams/writable:916:14)
+    at finishMaybe (node:internal/streams/writable:930:5)
+    at Writable.end (node:internal/streams/writable:845:5)
+[2025-10-31T06:37:47.514Z] Iniciando servidor PID=18192
+[2025-10-31T06:37:47.532Z] Servidor escuchando en 3000
+[2025-10-31T06:52:20.796Z] uncaughtException: Error: Unexpected Error: column header mismatch expected: 8 columns got: 15
+    at HeaderTransformer.processRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:66:23)
+    at HeaderTransformer.transform (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:33:30)
+    at CsvParserStream.transformRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:139:36)
+    at iterate (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:118:25)
+    at CsvParserStream.processRows (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:135:9)
+    at CsvParserStream._flush (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:76:25)
+    at CsvParserStream.final [as _final] (node:internal/streams/transform:128:10)
+    at prefinish (node:internal/streams/writable:916:14)
+    at finishMaybe (node:internal/streams/writable:930:5)
+    at Writable.end (node:internal/streams/writable:845:5)
+[2025-10-31T06:52:41.875Z] uncaughtException: Error: Unexpected Error: column header mismatch expected: 8 columns got: 15
+    at HeaderTransformer.processRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:66:23)
+    at HeaderTransformer.transform (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\transforms\HeaderTransformer.js:33:30)
+    at CsvParserStream.transformRow (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:139:36)
+    at iterate (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:118:25)
+    at CsvParserStream.processRows (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:135:9)
+    at CsvParserStream._flush (C:\Inst 59\Integracion de Programa\M&M central\Trabajo desde Hit Hub\Presupuestador\Clientes\node_modules\@fast-csv\parse\build\src\CsvParserStream.js:76:25)
+    at CsvParserStream.final [as _final] (node:internal/streams/transform:128:10)
+    at prefinish (node:internal/streams/writable:916:14)
+    at finishMaybe (node:internal/streams/writable:930:5)
+    at Writable.end (node:internal/streams/writable:845:5)
+[2025-11-04T00:28:31.223Z] Iniciando servidor PID=17572
+[2025-11-04T00:28:31.240Z] Servidor escuchando en 3000
+[2025-11-04T00:32:55.166Z] Cliente creado: Cardinali Martin <martin_cardinali@hotmail.com> Tel: 2267526554
+[2025-11-04T01:16:42.203Z] Cliente creado: Cardinali Martin <martin_cardinali@hotmail.com> Tel: 2267526554
+[2025-11-04T01:37:43.409Z] Iniciando servidor PID=18164
+[2025-11-04T01:37:43.433Z] Servidor escuchando en 3000
+[2025-11-05T06:27:04.458Z] Iniciando servidor PID=16864
+[2025-11-05T06:27:04.475Z] Servidor escuchando en 3000
+[2025-11-05T16:16:08.525Z] Iniciando servidor PID=13384
+[2025-11-05T16:16:08.544Z] Servidor escuchando en 3000
+[2025-11-05T16:39:22.808Z] Iniciando servidor PID=9620
+[2025-11-05T16:39:22.824Z] Servidor escuchando en 3000
+[2025-11-05T17:29:32.335Z] Cliente creado: Rodriguez Mateo <Rodriguezmatuu@gmail.com> Tel: 2267443041
+[2025-11-11T06:31:26.072Z] Iniciando servidor PID=19048
+[2025-11-11T06:31:26.088Z] Servidor escuchando en 3000
+[2025-11-11T07:14:21.547Z] Iniciando servidor PID=8968
+[2025-11-11T07:14:21.562Z] Servidor escuchando en 3000
+[2025-11-11T16:29:29.846Z] Iniciando servidor PID=19972
+[2025-11-11T16:29:29.863Z] Servidor escuchando en 3000
+[2025-11-11T21:38:57.758Z] Iniciando servidor PID=15084
+[2025-11-11T21:38:57.775Z] Servidor escuchando en 3000
+[2025-11-12T05:44:27.112Z] Iniciando servidor PID=12432
+[2025-11-12T05:44:27.142Z] Servidor escuchando en 3000
+[2025-11-12T06:45:15.885Z] Iniciando servidor PID=19372
+[2025-11-12T06:45:15.910Z] Servidor escuchando en 3000
+[2025-11-12T15:46:20.867Z] Iniciando servidor PID=19920
+[2025-11-12T15:46:20.883Z] Servidor escuchando en 3000
+[2025-11-12T16:17:51.146Z] Cliente creado: Cardinali Martin <Martin_cardinali@gmail.com> Tel: 2267526554
+[2025-11-12T16:41:30.475Z] Cliente creado: Cardinali Martin <martin_cardinali@hotmail.com> Tel: 2267526554
+[2025-11-12T16:48:46.741Z] Iniciando servidor PID=19008
+[2025-11-12T16:48:46.766Z] Servidor escuchando en 3000
+[2025-11-12T16:50:04.100Z] Cliente creado: Mateo Rodriguez <rodriguezmatuu@gmail.com> Tel: 2267443041
+[2025-11-12T17:37:17.412Z] Iniciando servidor PID=2208
+[2025-11-12T17:37:17.432Z] Servidor escuchando en 3000

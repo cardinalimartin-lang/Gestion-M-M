@@ -24,44 +24,23 @@
                     <label for="correo">Correo electrónico:</label>
                     <input type="email" id="correo" name="correo">
                 </div>
-                <div class="campo">
-                    <label for="direccion">Dirección:</label>
-                    <input type="text" id="direccion" name="direccion">
+                <div class="form-actions">
+                    <button type="submit" id="btn-guardar">GUARDAR CLIENTE</button>
                 </div>
             </form>
         </div>
 
-        <div class="contenedor-inferior">
-            
-            <div class="seccion-vehiculo">
-                <h3>Datos del Vehículo</h3>
-                <div class="campo">
-                    <label for="marca">Marca:</label>
-                    <input type="text" id="marca" name="marca">
-                </div>
-                <div class="campo">
-                    <label for="modelo">Modelo:</label>
-                    <input type="text" id="modelo" name="modelo">
-                </div>
-                <div class="campo">
-                    <label for="año">Año:</label>
-                    <input type="number" id="año" name="año" min="1900" max="2099">
-                </div>
-                <div class="campo">
-                    <label for="patente">Patente:</label>
-                    <input type="text" id="patente" name="patente">
-                </div>
-                <div class="campo">
-                    <label for="kilometraje">Kilometraje actual:</label>
-                    <input type="number" id="kilometraje" name="kilometraje" min="0">
-                </div>
-            </div>
-
-            <div class="seccion-adicional">
-                <h3>Acciones / Datos Adicionales</h3>
-                <button type="submit" form="formulario-cliente" id="btn-guardar">GUARDAR CLIENTE</button>
-            </div>
-
+        <div class="lista-clientes">
+            <table class="tabla-clientes" aria-label="Listado de clientes">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-clientes"></tbody>
+            </table>
         </div>
     </div>
     

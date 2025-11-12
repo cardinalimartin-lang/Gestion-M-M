@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vehículos - Alta</title>
+  <link rel="stylesheet" href="/login.css" />
+  <style>
+    body {
+      /* Fondo con la misma imagen del login */
+      background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/IMG/m%26m.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .vehiculos-wrapper { width: 100%; max-width: 720px; }
+    .vehiculos-card { backdrop-filter: blur(2px); }
+    .vehiculos-title { margin: 0 0 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .form-grid .input-group { margin-bottom: 0; }
+    .full { grid-column: 1 / -1; }
+    @media (max-width: 720px){ .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="vehiculos-wrapper">
+    <div class="card vehiculos-card">
+      <h1 class="vehiculos-title">Alta de Vehículos</h1>
+      <form id="form-vehiculo">
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="idauto">Idauto</label>
+            <input type="number" id="idauto" name="idauto" readonly />
+          </div>
+          <div class="input-group">
+            <label for="patente">Patente</label>
+            <input type="text" id="patente" name="patente" required />
+            <div id="patente-hint" style="margin-top:6px; font-size:13px; color: var(--muted);"></div>
+          </div>
+          <div class="input-group">
+            <label for="marca">Marca</label>
+            <input type="text" id="marca" name="marca" required />
+          </div>
+          <div class="input-group">
+            <label for="modelo">Modelo</label>
+            <input type="text" id="modelo" name="modelo" required />
+          </div>
+          <div class="input-group">
+            <label for="kilometraje">Kilometraje</label>
+            <input type="number" id="kilometraje" name="kilometraje" min="0" step="1" />
+          </div>
+          <div class="input-group">
+            <label for="tipoAceite">Tipo de aceite</label>
+            <input type="text" id="tipoAceite" name="tipoAceite" />
+          </div>
+          <div class="input-group full">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" />
+          </div>
+        </div>
+        <div class="input-group full" style="margin-top:14px">
+          <button type="submit" class="primary">Guardar Vehículo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="vehiculos-wrapper" style="margin-top:14px">
+    <div class="card vehiculos-card">
+      <h2 class="vehiculos-title" style="font-size:20px">Vehículos cargados</h2>
+      <div class="table-responsive">
+        <table class="tabla-vehiculos" style="width:100%; border-collapse: collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Id</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Patente</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Marca</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Modelo</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Kilometraje</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Aceite</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e5e7eb">Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-vehiculos"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="/Vehiculos/vehiculos.js"></script>
+</body>
+</html>
