@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const fechaInput = document.getElementById('fecha');
   const tbody = document.getElementById('tbody-vehiculos');
   const patenteHint = document.getElementById('patente-hint');
+  const clienteSelect = document.getElementById('cliente');
+  const btnNuevoCliente = document.getElementById('btn-nuevo-cliente');
+  const modalNuevoCliente = document.getElementById('modal-nuevo-cliente');
+  const formNuevoCliente = document.getElementById('form-nuevo-cliente');
+  const ncNombre = document.getElementById('nc-nombre');
+  const ncTelefono = document.getElementById('nc-telefono');
+  const ncCorreo = document.getElementById('nc-correo');
+  const ncCancelar = document.getElementById('nc-cancelar');
 
   function cargarProximoId() {
     fetch(`${BASE_URL}/vehiculos/next-id`, { cache: 'no-store' })
@@ -37,6 +45,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cargar listado inicial
   cargarVehiculos();
+
+  // Manejo del modal de nuevo cliente
+  function abrirModalNuevoCliente() {
+    if (!modalNuevoCliente) return;
+    modalNuevoCliente.style.display = 'flex';
+    modalNuevoCliente.setAttribute('aria-hidden', 'false');
+    if (ncNombre) ncNombre.focus();
+  }
+
+  function cerrarModalNuevoCliente() {
+    if (!modalNuevoCliente) return;
+    modalNuevoCliente.style.display = 'none';
+    modalNuevoCliente.setAttribute('aria-hidden', 'true');
+    if (formNuevoCliente) formNuevoCliente.reset();
+  }
+
+  if (btnNuevoCliente) {
+    btnNuevoCliente.addEventListener('click', () => {
+      abrirModalNuevoCliente();
+    });
+  }
+
+  if (ncCancelar) {
+    ncCancelar.addEventListener('click', () => {
+      cerrarModalNuevoCliente();
+    });
+  }
+
+  if (modalNuevoCliente) {
+    modalNuevoCliente.addEventListener('click', (e) => {
+      if (e.target === modalNuevoCliente) {
+        cerrarModalNuevoCliente();
+      }
+    });
+  }
+
+  // Cargar lista de clientes en el selector
+  function cargarClientesEnSelect() {
+    if (!clienteSelect) return;
+    fetch(`${BASE_URL}/clientes-todos`, { cache: 'no-store' })
+      .then(async r => {
+        const j = await r.json().catch(() => []);
+        if (!r.ok) throw new Error('No se pudo obtener la lista de clientes');
+        return Array.isArray(j) ? j : [];
+      })
+      .then(lista => {
+        clienteSelect.innerHTML = '<option value="">Seleccionar cliente...</option>';
+        lista.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id != null ? String(c.id) : '';
+          opt.textContent = c.NombreCliente || c.nombre || '';
+          if (c.Telefono || c.telefono) {
+            opt.textContent += ' - ' + (c.Telefono || c.telefono);
+          }
+          if (opt.value) clienteSelect.appendChild(opt);
+        });
+
+        // Si hay un cliente activo guardado, preseleccionarlo
+        if (clienteActivo && clienteActivo.id != null) {
+          const idStr = String(clienteActivo.id);
+          const opt = Array.from(clienteSelect.options).find(o => o.value === idStr);
+          if (opt) clienteSelect.value = idStr;
+        }
+      })
+      .catch(() => {
+        clienteSelect.innerHTML = '<option value="">(Error cargando clientes)</option>';
+      });
+  }
+
+  // Intentar recuperar un cliente activo global (seteado desde Clientes)
+  let clienteActivo = null;
+  try {
+    const raw = localStorage.getItem('clienteActivo');
+    if (raw) clienteActivo = JSON.parse(raw);
+  } catch (_) {}
+
+  cargarClientesEnSelect();
+
+  // Manejar creación de cliente desde el modal
+  if (formNuevoCliente) {
+    formNuevoCliente.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const payload = {
+        nombre: ncNombre ? ncNombre.value.trim() : '',
+        email: ncCorreo ? ncCorreo.value.trim() : '',
+        telefono: ncTelefono ? ncTelefono.value.trim() : ''
+      };
+      if (!payload.nombre) {
+        alert('El nombre del cliente es obligatorio');
+        return;
+      }
+      fetch(`${BASE_URL}/crear-cliente`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        cache: 'no-store'
+      })
+        .then(async r => {
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) {
+            const msg = j.error || `Error al crear cliente (${r.status})`;
+            throw new Error(msg);
+          }
+          return j;
+        })
+        .then(j => {
+          // Guardar como clienteActivo global
+          try {
+            if (j.id != null) {
+              const clienteActivoNuevo = {
+                id: j.id,
+                nombre: payload.nombre,
+                email: payload.email,
+                telefono: payload.telefono
+              };
+              localStorage.setItem('clienteActivo', JSON.stringify(clienteActivoNuevo));
+              clienteActivo = clienteActivoNuevo;
+            }
+          } catch (_) {}
+
+          // Recargar combo y seleccionar al nuevo cliente
+          cargarClientesEnSelect();
+          cerrarModalNuevoCliente();
+        })
+        .catch(err => {
+          alert('No se pudo crear el cliente: ' + err.message);
+        });
+    });
+  }
 
   // Búsqueda en vivo por patente para verificar existencia
   let t;
@@ -61,7 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
       modelo: (modeloInput.value || '').trim(),
       kilometraje: kmInput.value ? Number(kmInput.value) : '',
       tipoAceite: (aceiteInput.value || '').trim(),
-      fecha: (fechaInput.value || '').trim()
+      fecha: (fechaInput.value || '').trim(),
+      idCliente: clienteSelect && clienteSelect.value ? Number(clienteSelect.value) : undefined
     };
 
     fetch(`${BASE_URL}/vehiculos/crear`, {

@@ -1,326 +1,441 @@
-const marcaSelect = document.getElementById("marca");
-const modeloSelect = document.getElementById("modelo");
-const motorSelect = document.getElementById("motor");
-const resultadoDiv = document.getElementById("resultado");
-const fileBdato = document.getElementById("fileBdato");
-const fileExistencia = document.getElementById("fileExistencia");
+// Mover el código a index.js
+  document.addEventListener('DOMContentLoaded', function() {
+    // Este código se ha movido a index.js
+    const selectMarca = document.getElementById('marca');
+    const selectModelo = document.getElementById('modelo');
+    const selectMotor = document.getElementById('motor');
 
-let datosCSV = [];
-let preciosCSV = [];
-let filaModeloH = null;
+    const celdaTipoCombustible = document.getElementById('tipo-combustible');
+    const spanAceiteMan = document.getElementById('codigo-aceite-man');
+    const spanAceiteWix = document.getElementById('codigo-aceite-wix');
+    const spanAireMan = document.getElementById('codigo-aire-man');
+    const spanAireWix = document.getElementById('codigo-aire-wix');
+    const spanFCombMan = document.getElementById('codigo-fcomb-man');
+    const spanFCombWix = document.getElementById('codigo-fcomb-wix');
+    const spanHabitaculoMan = document.getElementById('codigo-habitaculo-man');
+    const spanHabitaculoWix = document.getElementById('codigo-habitaculo-wix');
 
-// ---- Utilidades comunes ----
-function normalizarFilas(arr) {
-  return (arr || [])
-    .filter(r => r && typeof r === 'object')
-    .map(r => {
-      const out = {};
-      for (const k in r) out[(k || '').toString().trim()] = (r[k] || '').toString().trim();
-      return out;
-    });
-}
+    const detalleFiltroAceite = document.getElementById('detalle-filtro-aceite');
+    const detalleFiltroAire = document.getElementById('detalle-filtro-aire');
+    const detalleFiltroFCombustible = document.getElementById('detalle-filtro-fcombustible');
+    const detalleFiltroHabitaculo = document.getElementById('detalle-filtro-habitaculo');
 
-function parsearPrecios(arr) {
-  return (arr || []).map(row => {
-    const codigo = (row['BSDATO'] || row['Codigo'] || '') + '';
-    const descripcion = (row['Descripción'] || row['Descripcion'] || '') + '';
-    const precioRaw = (row['Precio de venta'] || row['Precio'] || '') + '';
-    const precioNum = precioRaw.toString().trim().replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.');
-    return {
-      codigo: codigo.trim().toUpperCase(),
-      descripcion: descripcion.trim().toUpperCase(),
-      precio: isFinite(parseFloat(precioNum)) ? parseFloat(precioNum) : null
-    };
-  });
-}
+    const cantFiltroAceite = document.getElementById('cant-filtro-aceite');
+    const cantFiltroAire = document.getElementById('cant-filtro-aire');
+    const cantFiltroFComb = document.getElementById('cant-filtro-fcombustible');
+    const cantFiltroHabitaculo = document.getElementById('cant-filtro-habitaculo');
 
-// ---- Carga por HTTP (si está disponible) ----
-Papa.parse("bdato.csv?v=" + Date.now(), {
-  download: true,
-  header: true,
-  delimiter: ";",
-  skipEmptyLines: true,
-  transformHeader: h => h ? h.trim() : "",
-  complete: function (results) {
-    if (!results || !Array.isArray(results.data)) {
-      console.error('bdato.csv: formato inesperado', results);
-      return;
+    const precioFiltroAceite = document.getElementById('precio-filtro-aceite');
+    const precioFiltroAire = document.getElementById('precio-filtro-aire');
+    const precioFiltroFComb = document.getElementById('precio-filtro-fcombustible');
+    const precioFiltroHabitaculo = document.getElementById('precio-filtro-habitaculo');
+
+    const totalFiltroAceite = document.getElementById('total-filtro-aceite');
+    const totalFiltroAire = document.getElementById('total-filtro-aire');
+    const totalFiltroFComb = document.getElementById('total-filtro-fcombustible');
+    const totalFiltroHabitaculo = document.getElementById('total-filtro-habitaculo');
+
+    const existFiltroAceite = document.getElementById('exist-filtro-aceite');
+    const existFiltroAire = document.getElementById('exist-filtro-aire');
+    const existFiltroFComb = document.getElementById('exist-filtro-fcombustible');
+    const existFiltroHabitaculo = document.getElementById('exist-filtro-habitaculo');
+
+    const tablaFiltrosVehiculo = document.querySelector('.bloque-filtros-vehiculo table');
+
+    let datos = [];
+
+    function parseCSV(texto) {
+      const lineas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lineas.length === 0) return [];
+      const encabezados = lineas[0].split(';').map(h => h.trim());
+      const registros = [];
+      for (let i = 1; i < lineas.length; i++) {
+        const partes = lineas[i].split(';');
+        if (partes.length < encabezados.length) continue;
+        const fila = {};
+        encabezados.forEach((h, idx) => {
+          fila[h] = (partes[idx] || '').toString().trim();
+        });
+        registros.push(fila);
+      }
+      return registros;
     }
 
-    datosCSV = normalizarFilas(results.data);
-
-    console.log('Filas cargadas bdato.csv:', datosCSV.length);
-    cargarMarcas();
-  },
-  error: function (err) {
-    console.error("Error al leer bdato.csv:", err);
-  }
-});
-
-Papa.parse("existenciacsv.csv?v=" + Date.now(), {
-  download: true,
-  header: true,
-  delimiter: ";",
-  skipEmptyLines: true,
-  transformHeader: h => h ? h.trim() : "",
-  complete: function (results) {
-    preciosCSV = parsearPrecios(results.data || []);
-    console.log('Precios cargados:', preciosCSV.length);
-  },
-  error: function (err) {
-    console.error("Error al leer existenciacsv.csv:", err);
-  }
-});
-
-function cargarMarcas() {
-  const marcas = [...new Set(datosCSV.map(r => (r.Marca || '').trim()).filter(Boolean))]
-    .sort((a,b) => a.localeCompare(b, 'es', {sensitivity:'base'}));
-  marcas.forEach(marca => {
-    const option = document.createElement("option");
-    option.value = marca;
-    option.textContent = marca;
-    marcaSelect.appendChild(option);
-  });
-}
-
-marcaSelect.addEventListener("change", () => {
-  modeloSelect.innerHTML = '<option value="">Seleccione un modelo</option>';
-  motorSelect.innerHTML = '<option value="">Seleccione un motor</option>';
-  resultadoDiv.innerHTML = "";
-  modeloSelect.disabled = true;
-  motorSelect.disabled = true;
-  filaModeloH = null;
-
-  const marca = marcaSelect.value;
-  if (!marca) return;
-
-  const modelos = [...new Set(
-    datosCSV
-      .filter(row => row.Marca === marca)
-      .map(row => (row.Modelo || '').toString().trim())
-      .filter(m => m && m !== '')
-  )].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-
-  modelos.forEach(modelo => {
-    const option = document.createElement("option");
-    option.value = modelo;
-    option.textContent = modelo;
-    modeloSelect.appendChild(option);
-  });
-
-  modeloSelect.disabled = modelos.length > 0 ? false : true;
-});
-
-modeloSelect.addEventListener("change", () => {
-  motorSelect.innerHTML = '<option value="">Seleccione un motor</option>';
-  resultadoDiv.innerHTML = "";
-  motorSelect.disabled = true;
-
-  const marca = marcaSelect.value;
-  const modelo = modeloSelect.value;
-  if (!modelo) return;
-
-  const filasModelo = datosCSV.filter(row => row.Marca === marca && (row.Modelo || '').toString().trim() === modelo);
-
-  // Extraer motores tanto de la columna Motor como de cadenas embebidas en Modelo (p.ej. "Motorcode... CJCD,CMFB")
-  const motoresSet = new Set();
-  filasModelo.forEach(row => {
-    const motorField = (row.Motor || '').toString().trim();
-    if (motorField) {
-      motorField.split(/[;,\/]+/).map(s => s.trim()).filter(Boolean).forEach(code => motoresSet.add(code));
-    } else {
-      const modeloField = (row.Modelo || '').toString();
-      // Buscar patrones tipo "CJCD,CMFB" (grupos de 2-6 mayúsculas/dígitos separados por comas)
-      const matches = modeloField.match(/[A-Z0-9]{2,6}(?:,[A-Z0-9]{2,6})*/g);
-      if (matches) {
-        matches.forEach(m => m.split(',').map(x => x.trim()).filter(Boolean).forEach(code => motoresSet.add(code)));
+    function llenarSelect(select, valores) {
+      const valorActual = select.value;
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+      valores.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+      if (valores.includes(valorActual)) {
+        select.value = valorActual;
+      } else {
+        select.value = '';
       }
     }
-  });
 
-  const motoresValidos = [...motoresSet].filter(m => m && m !== '').sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    function valoresUnicos(lista, clave) {
+      const set = new Set();
+      lista.forEach(fila => {
+        const v = fila[clave];
+        if (v) set.add(v);
+      });
+      return Array.from(set).sort();
+    }
 
-  motoresValidos.forEach(motor => {
-    const option = document.createElement("option");
-    option.value = motor;
-    option.textContent = motor;
-    motorSelect.appendChild(option);
-  });
+    function resetDetalleFiltros() {
+      if (detalleFiltroAceite) detalleFiltroAceite.textContent = 'Seleccione Filtro';
+      if (detalleFiltroAire) detalleFiltroAire.textContent = 'Seleccione Filtro';
+      if (detalleFiltroFCombustible) detalleFiltroFCombustible.textContent = 'Seleccione Filtro';
+      if (detalleFiltroHabitaculo) detalleFiltroHabitaculo.textContent = 'Seleccione Filtro';
 
-  motorSelect.disabled = motoresValidos.length > 0 ? false : true;
+      [
+        precioFiltroAceite, precioFiltroAire, precioFiltroFComb, precioFiltroHabitaculo,
+        totalFiltroAceite, totalFiltroAire, totalFiltroFComb, totalFiltroHabitaculo,
+        existFiltroAceite, existFiltroAire, existFiltroFComb, existFiltroHabitaculo
+      ].forEach(el => { if (el) el.textContent = ''; });
 
-  filaModeloH = filasModelo.reduce((mejor, actual) => {
-    const score = ["H1", "H2"].filter(col => actual[col] && actual[col].trim() !== "").length;
-    const mejorScore = ["H1", "H2"].filter(col => mejor[col] && mejor[col].trim() !== "").length;
-    return score > mejorScore ? actual : mejor;
-  }, filasModelo[0]);
+      [cantFiltroAceite, cantFiltroAire, cantFiltroFComb, cantFiltroHabitaculo].forEach(input => {
+        if (input) input.value = 1;
+      });
+    }
 
-  mostrarTabla([filaModeloH], ["H1", "H2"]);
-});
+    function limpiarCeldasFiltros() {
+      celdaTipoCombustible.textContent = '';
+      spanAceiteMan.textContent = '';
+      spanAceiteWix.textContent = '';
+      spanAireMan.textContent = '';
+      spanAireWix.textContent = '';
+      spanFCombMan.textContent = '';
+      spanFCombWix.textContent = '';
+      spanHabitaculoMan.textContent = '';
+      spanHabitaculoWix.textContent = '';
 
-motorSelect.addEventListener("change", () => {
-  resultadoDiv.innerHTML = "";
+      const filasExtras = document.querySelectorAll('tr[data-extra-filtro]');
+      filasExtras.forEach(tr => tr.remove());
 
-  const marca = marcaSelect.value;
-  const modelo = modeloSelect.value;
-  const motor = motorSelect.value;
+      const checkboxes = document.querySelectorAll('.bloque-filtros-vehiculo input[type="checkbox"]');
+      checkboxes.forEach(chk => { chk.checked = false; });
 
-  const filasMotor = datosCSV.filter(
-    row => row.Marca === marca && row.Modelo === modelo && row.Motor === motor
-  );
+      resetDetalleFiltros();
+    }
 
-  if (filasMotor.length === 0) {
-    resultadoDiv.innerHTML = "<p>No se encontraron datos para ese motor.</p>";
-    return;
-  }
+    function parsePrecioFromSpan(spanEl) {
+      if (!spanEl) return 0;
+      const txt = spanEl.textContent.replace(/[^0-9,.-]/g, '').trim();
+      if (!txt) return 0;
+      // formato esperado: 1234,56
+      const normalizado = txt.replace('.', '').replace(',', '.');
+      const n = parseFloat(normalizado);
+      return isNaN(n) ? 0 : n;
+    }
 
-  const filaMasCompleta = filasMotor.reduce((mejor, actual) => {
-    const score = Object.values(actual).filter(val => val && val.trim() !== "").length;
-    const mejorScore = Object.values(mejor).filter(val => val && val.trim() !== "").length;
-    return score > mejorScore ? actual : mejor;
-  }, filasMotor[0]);
+    function actualizarTotalLinea(cantInput, precioSpan, totalSpan) {
+      if (!cantInput || !precioSpan || !totalSpan) return;
+      const cantidad = parseFloat(cantInput.value) || 0;
+      const precio = parsePrecioFromSpan(precioSpan);
+      const total = cantidad * precio;
+      totalSpan.textContent = total ? total.toFixed(2) : '';
+    }
 
-  const filaFinal = { ...filaMasCompleta };
-  if (filaModeloH) {
-    filaFinal.H1 = filaModeloH.H1 || filaFinal.H1;
-    filaFinal.H2 = filaModeloH.H2 || filaFinal.H2;
-  }
+    function obtenerRefsLinea(grupo) {
+      switch (grupo) {
+        case 'aceite':
+          return {
+            cant: cantFiltroAceite,
+            precio: precioFiltroAceite,
+            total: totalFiltroAceite,
+            exist: existFiltroAceite
+          };
+        case 'aire':
+          return {
+            cant: cantFiltroAire,
+            precio: precioFiltroAire,
+            total: totalFiltroAire,
+            exist: existFiltroAire
+          };
+        case 'fcombustible':
+          return {
+            cant: cantFiltroFComb,
+            precio: precioFiltroFComb,
+            total: totalFiltroFComb,
+            exist: existFiltroFComb
+          };
+        case 'habitaculo':
+          return {
+            cant: cantFiltroHabitaculo,
+            precio: precioFiltroHabitaculo,
+            total: totalFiltroHabitaculo,
+            exist: existFiltroHabitaculo
+          };
+        default:
+          return null;
+      }
+    }
 
-  mostrarTabla([filaFinal], [
-    "Motor",
-    "Desde/Hasta",
-    "Filtro de Aire",
-    "Filtro de Aceite 1",
-    "F Nafta",
-    "H1",
-    "H2"
-  ]);
-});
+    function limpiarLineaPrecio(grupo) {
+      const refs = obtenerRefsLinea(grupo);
+      if (!refs) return;
+      if (refs.precio) refs.precio.textContent = '';
+      if (refs.total) refs.total.textContent = '';
+      if (refs.exist) refs.exist.textContent = '';
+      if (refs.cant) refs.cant.value = 1;
+    }
 
-function buscarPrecio(codigo) {
-  if (!codigo || codigo.trim() === "") return null;
-  const codigoUpper = codigo.trim().toUpperCase();
-  const match = preciosCSV.find(p =>
-    p.codigo === codigoUpper || p.descripcion.includes(codigoUpper)
-  );
-  return match ? parseFloat(match.precio) : null;
-}
+    function formatearPrecio(valor) {
+      if (!valor) return '';
+      try {
+        return valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } catch {
+        return valor.toFixed(2);
+      }
+    }
 
-function mostrarTabla(filas, columnasDeseadas) {
-  if (!filas || filas.length === 0) return;
+    function actualizarPrecioDesdeBackend(grupo, codigo) {
+      const refs = obtenerRefsLinea(grupo);
+      if (!refs) return;
+      if (!codigo) {
+        limpiarLineaPrecio(grupo);
+        return;
+      }
 
-  // 🧼 Excluir columna CA si aparece por error
-  const columnasFiltradas = columnasDeseadas.filter(col => col !== "CA");
+      fetch(`/api/existencia?codigo=${encodeURIComponent(codigo)}`)
+        .then(resp => resp.json())
+        .then(data => {
+          if (!data || !data.ok || !data.encontrado || !data.data) {
+            limpiarLineaPrecio(grupo);
+            return;
+          }
+          const precio = Number(data.data.precioUnidad) || 0;
+          const existencia = data.data.existencia || '';
+          if (refs.precio) refs.precio.textContent = precio ? formatearPrecio(precio) : '';
+          if (refs.exist) refs.exist.textContent = existencia;
+          actualizarTotalLinea(refs.cant, refs.precio, refs.total);
+        })
+        .catch(err => {
+          console.error('Error consultando /api/existencia', err);
+          limpiarLineaPrecio(grupo);
+        });
+    }
 
-  let html = `
-    <table>
-      <thead>
-        <tr>${columnasFiltradas.map(col => `<th>${col}</th>`).join("")}</tr>
-      </thead>
-      <tbody>
-        ${filas.map(fila => `
-          <tr>
-            ${columnasFiltradas.map(col => `<td>${fila[col] || "—"}</td>`).join("")}
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
+    function separarPorElemento(registros, nombresElemento) {
+      const candidatos = registros.filter(r => nombresElemento.includes(r['Elemento']));
+      if (candidatos.length === 0) return { principal: null, extras: [] };
 
-  // ❌ Excluir H2 del bloque de precios
-  const codigos = [
-    filas[0]["Filtro de Aire"],
-    filas[0]["Filtro de Aceite 1"],
-    filas[0]["F Nafta"],
-    filas[0]["H1"]
-  ].filter(c => c && c.trim() !== "");
+      const codigosVistos = new Set();
+      const candidatosUnicos = candidatos.filter(r => {
+        const codigoMan = r['Codigo Man'] || '';
+        const codigoWix = r['Codigo Wix'] || '';
+        const clave = `${codigoMan}|${codigoWix}`;
+        
+        if ((!codigoMan || codigoMan === '#N/A') && (!codigoWix || codigoWix === '#N/A')) {
+            return false;
+        }
 
-  let preciosHTML = `
-    <h3>Precios encontrados</h3>
-    <table>
-      <thead>
-        <tr><th>✔</th><th>Código</th><th>Precio</th></tr>
-      </thead>
-      <tbody>
-        ${codigos.map((codigo, i) => {
-          const precio = buscarPrecio(codigo);
-          return `
-            <tr>
-              <td><input type="checkbox" class="selector-precio" data-precio="${precio || 0}" /></td>
-              <td>${codigo}</td>
-              <td>${precio !== null ? `$${precio.toFixed(2)}` : "—"}</td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-    <div style="text-align:right; font-weight:bold; margin-top:10px;">
-      Total: $<span id="total-precio">0.00</span>
-    </div>
-  `;
+        if (codigosVistos.has(clave)) {
+          return false;
+        } else {
+          codigosVistos.add(clave);
+          return true;
+        }
+      });
+      
+      if (candidatosUnicos.length === 0) return { principal: null, extras: [] };
+      
+      const conCodigos = candidatosUnicos.filter(
+        r => r['Codigo Man'] && r['Codigo Man'] !== '#N/A' && r['Codigo Wix'] && r['Codigo Wix'] !== '#N/A'
+      );
+      const principal = conCodigos.length > 0 ? conCodigos[0] : candidatosUnicos[0];
+      const extras = candidatosUnicos.filter(r => r !== principal);
+      return { principal, extras };
+    }
 
-  resultadoDiv.innerHTML += html + preciosHTML;
+    function agregarFilasExtras(despuesDeFilaId, tipoTexto, extras, etiquetaFiltro) {
+      if (!extras || extras.length === 0) return;
+      const filaBase = document.getElementById(despuesDeFilaId);
+      if (!filaBase) return;
+      let referencia = filaBase;
+      extras.forEach(extra => {
+        const nueva = document.createElement('tr');
+        nueva.setAttribute('data-extra-filtro', etiquetaFiltro);
 
-  document.querySelectorAll(".selector-precio").forEach(checkbox => {
-    checkbox.addEventListener("change", actualizarTotal);
-  });
-}
+        const tdTipo = document.createElement('td');
+        tdTipo.textContent = tipoTexto;
+        const tdMan = document.createElement('td');
+        const tdWix = document.createElement('td');
 
-function actualizarTotal() {
-  let total = 0;
-  document.querySelectorAll(".selector-precio").forEach(cb => {
-    if (cb.checked) {
-      total += parseFloat(cb.dataset.precio);
+        const labelMan = document.createElement('label');
+        const chkMan = document.createElement('input');
+        chkMan.type = 'checkbox';
+        const spanMan = document.createElement('span');
+        spanMan.textContent = extra['Codigo Man'] || '';
+        labelMan.appendChild(chkMan);
+        labelMan.appendChild(spanMan);
+
+        const labelWix = document.createElement('label');
+        const chkWix = document.createElement('input');
+        chkWix.type = 'checkbox';
+        const spanWix = document.createElement('span');
+        spanWix.textContent = extra['Codigo Wix'] || '';
+        labelWix.appendChild(chkWix);
+        labelWix.appendChild(spanWix);
+
+        tdMan.appendChild(labelMan);
+        tdWix.appendChild(labelWix);
+
+        nueva.appendChild(tdTipo);
+        nueva.appendChild(tdMan);
+        nueva.appendChild(tdWix);
+
+        referencia.parentNode.insertBefore(nueva, referencia.nextSibling);
+        referencia = nueva;
+      });
+    }
+
+    function actualizarFiltrosParaSeleccion() {
+      limpiarCeldasFiltros();
+      const marca = selectMarca.value;
+      const modelo = selectModelo.value;
+      const motor = selectMotor.value;
+      if (!marca || !modelo || !motor) return;
+
+      const filtrados = datos.filter(r => r['Marca'] === marca && r['Modelo'] === modelo && r['Motor'] === motor);
+      if (filtrados.length === 0) return;
+
+      const combustible = filtrados[0]['Combustible'] || '';
+      if (combustible) {
+        celdaTipoCombustible.textContent = 'Combustible: ' + combustible;
+      }
+
+      const aceite = separarPorElemento(filtrados, ['Filtro de aceite']);
+      if (aceite.principal) {
+        spanAceiteMan.textContent = aceite.principal['Codigo Man'] || '';
+        spanAceiteWix.textContent = aceite.principal['Codigo Wix'] || '';
+      }
+      agregarFilasExtras('row-aceite', 'Filtro de Aceite', aceite.extras, 'aceite');
+
+      const aire = separarPorElemento(filtrados, ['Filtro de aire']);
+      if (aire.principal) {
+        spanAireMan.textContent = aire.principal['Codigo Man'] || '';
+        spanAireWix.textContent = aire.principal['Codigo Wix'] || '';
+      }
+      agregarFilasExtras('row-aire', 'Filtro de Aire', aire.extras, 'aire');
+
+      const fcomb = separarPorElemento(filtrados, ['Filtro de combustible']);
+      if (fcomb.principal) {
+        spanFCombMan.textContent = fcomb.principal['Codigo Man'] || '';
+        spanFCombWix.textContent = fcomb.principal['Codigo Wix'] || '';
+      }
+      agregarFilasExtras('row-fcomb', 'Filtro de Combustible', fcomb.extras, 'fcombustible');
+
+      const habit = separarPorElemento(filtrados, ['Filtro de aire de cabina']);
+      if (habit.principal) {
+        spanHabitaculoMan.textContent = habit.principal['Codigo Man'] || '';
+        spanHabitaculoWix.textContent = habit.principal['Codigo Wix'] || '';
+      }
+      agregarFilasExtras('row-habitaculo', 'Filtro de Habitáculo', habit.extras, 'habitaculo');
+    }
+
+    function inicializarEventos() {
+      selectMarca.addEventListener('change', () => {
+        const marca = selectMarca.value;
+        const porMarca = marca ? datos.filter(r => r['Marca'] === marca) : datos;
+        const modelos = valoresUnicos(porMarca, 'Modelo');
+        llenarSelect(selectModelo, modelos);
+        llenarSelect(selectMotor, []);
+        limpiarCeldasFiltros();
+      });
+
+      selectModelo.addEventListener('change', () => {
+        const marca = selectMarca.value;
+        const modelo = selectModelo.value;
+        const porMarcaModelo = datos.filter(r => (!marca || r['Marca'] === marca) && (!modelo || r['Modelo'] === modelo));
+        const motores = valoresUnicos(porMarcaModelo, 'Motor');
+        llenarSelect(selectMotor, motores);
+        limpiarCeldasFiltros();
+      });
+
+      selectMotor.addEventListener('change', () => {
+        actualizarFiltrosParaSeleccion();
+      });
+
+      if (tablaFiltrosVehiculo) {
+        tablaFiltrosVehiculo.addEventListener('change', (event) => {
+          const target = event.target;
+          if (!target || target.tagName !== 'INPUT' || target.type !== 'checkbox') return;
+
+          const fila = target.closest('tr');
+          if (!fila) return;
+
+          let grupo = null;
+          if (fila.id === 'row-aceite' || fila.dataset.extraFiltro === 'aceite') grupo = 'aceite';
+          else if (fila.id === 'row-aire' || fila.dataset.extraFiltro === 'aire') grupo = 'aire';
+          else if (fila.id === 'row-fcomb' || fila.dataset.extraFiltro === 'fcombustible') grupo = 'fcombustible';
+          else if (fila.id === 'row-habitaculo' || fila.dataset.extraFiltro === 'habitaculo') grupo = 'habitaculo';
+          if (!grupo) return;
+
+          const selectoresPorGrupo = {
+            aceite: '#row-aceite input[type="checkbox"], tr[data-extra-filtro="aceite"] input[type="checkbox"]',
+            aire: '#row-aire input[type="checkbox"], tr[data-extra-filtro="aire"] input[type="checkbox"]',
+            fcombustible: '#row-fcomb input[type="checkbox"], tr[data-extra-filtro="fcombustible"] input[type="checkbox"]',
+            habitaculo: '#row-habitaculo input[type="checkbox"], tr[data-extra-filtro="habitaculo"] input[type="checkbox"]'
+          };
+
+          const detallePorGrupo = {
+            aceite: detalleFiltroAceite,
+            aire: detalleFiltroAire,
+            fcombustible: detalleFiltroFCombustible,
+            habitaculo: detalleFiltroHabitaculo
+          };
+
+          const selectorGrupo = selectoresPorGrupo[grupo];
+          const celdaDetalle = detallePorGrupo[grupo];
+          if (!selectorGrupo || !celdaDetalle) return;
+
+          if (target.checked) {
+            const otros = document.querySelectorAll(selectorGrupo);
+            otros.forEach(chk => {
+              if (chk !== target) chk.checked = false;
+            });
+
+            const label = target.closest('label');
+            const spanCodigo = label ? label.querySelector('span') : null;
+            const codigo = spanCodigo ? spanCodigo.textContent.trim() : '';
+            celdaDetalle.textContent = codigo || 'Seleccione Filtro';
+            actualizarPrecioDesdeBackend(grupo, codigo);
+          } else {
+            celdaDetalle.textContent = 'Seleccione Filtro';
+            limpiarLineaPrecio(grupo);
+          }
+        });
+      }
+    }
+
+    function inicializar() {
+      fetch('bdato.csv')
+        .then(resp => resp.text())
+        .then(texto => {
+          datos = parseCSV(texto);
+          const marcas = valoresUnicos(datos, 'Marca');
+          llenarSelect(selectMarca, marcas);
+          resetDetalleFiltros();
+          inicializarEventos();
+        })
+        .catch(err => {
+          console.error('Error cargando bdato.csv', err);
+        });
+    }
+
+    // Función para formatear números como moneda
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inicializar);
+    } else {
+      inicializar();
     }
   });
-  document.getElementById("total-precio").textContent = total.toFixed(2);
-}
-
-// ---- Carga desde archivos locales (evita CORS con file://) ----
-function parseBdatoDesdeArchivo(file) {
-  if (!file) return;
-  Papa.parse(file, {
-    header: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    transformHeader: h => h ? h.trim() : "",
-    complete: function (results) {
-      datosCSV = normalizarFilas(results.data);
-      // Reset selects
-      marcaSelect.innerHTML = '<option value="">Seleccione una marca</option>';
-      modeloSelect.innerHTML = '<option value="">Seleccione un modelo</option>';
-      motorSelect.innerHTML = '<option value="">Seleccione un motor</option>';
-      modeloSelect.disabled = true;
-      motorSelect.disabled = true;
-      resultadoDiv.innerHTML = '';
-      cargarMarcas();
-    },
-    error: function (err) {
-      console.error('Error al leer archivo bdato.csv local:', err);
-    }
-  });
-}
-
-function parseExistenciaDesdeArchivo(file) {
-  if (!file) return;
-  Papa.parse(file, {
-    header: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    transformHeader: h => h ? h.trim() : "",
-    complete: function (results) {
-      preciosCSV = parsearPrecios(results.data || []);
-      console.log('Precios (archivo local) cargados:', preciosCSV.length);
-    },
-    error: function (err) {
-      console.error('Error al leer archivo existenciacsv.csv local:', err);
-    }
-  });
-}
-
-if (fileBdato) {
-  fileBdato.addEventListener('change', (e) => parseBdatoDesdeArchivo(e.target.files[0]));
-}
-if (fileExistencia) {
-  fileExistencia.addEventListener('change', (e) => parseExistenciaDesdeArchivo(e.target.files[0]));
-}

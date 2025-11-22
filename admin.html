@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración de usuarios</title>
+  <link rel="stylesheet" href="login.css">
+  <style>
+    body { padding: 16px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+    .grid { width: 100%; border-collapse: collapse; }
+    .grid th, .grid td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    .grid th { background: #f3f3f3; }
+    .actions { display: flex; gap: 8px; }
+    .primary { background: #2d6cdf; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+    .secondary { background: #e7e7e7; color: #333; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+    .danger { background: #d9534f; color: #fff; }
+    .success { background: #28a745; color: #fff; }
+    input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .msg { margin-top: 8px; min-height: 20px; }
+    .menu { display: flex; gap: 8px; margin: 12px 0; }
+    .menu button.active { outline: 2px solid #2d6cdf; }
+  </style>
+</head>
+<body>
+  <h1>Administración de usuarios <small style="font-size:0.6em; font-weight:normal">(Admin: <span id="adminName"></span>)</small></h1>
+
+  <div class="menu">
+    <button data-panel="panel-list" class="secondary">Listado</button>
+    <button data-panel="panel-create" class="secondary">Crear</button>
+    <button data-panel="panel-edit" class="secondary">Editar</button>
+    <div style="flex:1"></div>
+    <button id="exitBtn" class="secondary">Salir</button>
+  </div>
+
+  <div id="panel-list">
+    <div class="toolbar">
+      <input id="newUser" type="text" placeholder="Usuario">
+      <input id="newPass" type="password" placeholder="Contraseña">
+      <label style="display:flex; align-items:center; gap:6px"><input id="newAdmin" type="checkbox"> Admin</label>
+      <button id="createBtn" class="primary">Crear usuario</button>
+      <button id="refreshBtn" class="secondary">Actualizar lista</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <table class="grid" id="usersTable">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Estado</th>
+          <th>Admin</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="panel-create" style="display:none">
+    <div class="toolbar">
+      <input id="newUser2" type="text" placeholder="Usuario">
+      <input id="newPass2" type="password" placeholder="Contraseña">
+      <label style="display:flex; align-items:center; gap:6px"><input id="newAdmin2" type="checkbox"> Admin</label>
+      <button id="createBtn2" class="primary">Crear usuario</button>
+    </div>
+  </div>
+
+  <div id="panel-edit" style="display:none">
+    <div class="toolbar" style="flex-wrap:wrap; gap:12px">
+      <input id="editUsername" type="text" placeholder="Usuario">
+      <input id="editPassword" type="password" placeholder="Nueva contraseña (opcional)">
+      <label style="display:flex; align-items:center; gap:6px"><input id="editSuspended" type="checkbox"> Suspendido</label>
+      <label style="display:flex; align-items:center; gap:6px"><input id="editAdmin" type="checkbox"> Admin</label>
+      <button id="saveEditBtn" class="success">Guardar</button>
+      <button id="deleteEditBtn" class="danger">Eliminar</button>
+    </div>
+  </div>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ const path = require('path');
 const csv = require('fast-csv');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const XLSX = require('xlsx');
 
 const app = express();
 const PORT = 3000;
@@ -12,6 +13,8 @@ const CLIENTES_CSV = path.resolve(__dirname, 'clientes.csv');
 // relaciones.csv eliminado: ahora vehiculos.csv contiene ID_CLIENTE
 const LOG_FILE = path.resolve(__dirname, 'server.log');
 const PID_FILE = path.resolve(__dirname, 'server.pid');
+const MENSAJES_CSV = path.resolve(__dirname, 'mensajes.csv');
+const EXISTENCIA_XLS = path.resolve(__dirname, '..', 'Presupuesto', 'existencia.xls');
 
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}\n`;
@@ -175,15 +178,16 @@ function loadUsersFromCsv() {
       const username = parts[0] ? parts[0].trim() : '';
       const password = parts[1] ? parts[1].trim() : '';
       const suspended = parts[2] ? (parts[2].trim() === 'true') : false;
-      if (username) users[username] = { password, suspended };
+      const admin = parts[3] ? (parts[3].trim() === 'true') : (username === 'admin' || username === 'Admmin' || username === 'Admin');
+      if (username) users[username] = { password, suspended, admin };
     }
   } catch (e) { console.error('Error leyendo usuarios.csv', e); }
   return users;
 }
 
-function appendUserToCsv(username, password, suspended = false) {
+function appendUserToCsv(username, password, suspended = false, admin = false) {
   try {
-    const line = `${username},${password},${suspended ? 'true' : 'false'}\n`;
+    const line = `${username},${password},${suspended ? 'true' : 'false'},${admin ? 'true' : 'false'}\n`;
     fs.appendFileSync(USERS_CSV, line, { encoding: 'utf8' });
     log(`Usuario creado: ${username}`);
     return true;
@@ -195,10 +199,10 @@ function appendUserToCsv(username, password, suspended = false) {
 
 function writeAllUsersToCsv(usersObj) {
   try {
-    const lines = ['username,password,suspended'];
+    const lines = ['username,password,suspended,admin'];
     Object.keys(usersObj).forEach(u => {
       const item = usersObj[u];
-      lines.push(`${u},${item.password},${item.suspended ? 'true' : 'false'}`);
+      lines.push(`${u},${item.password},${item.suspended ? 'true' : 'false'},${item.admin ? 'true' : 'false'}`);
     });
     fs.writeFileSync(USERS_CSV, lines.join('\n') + '\n', { encoding: 'utf8' });
     return true;
@@ -208,30 +212,156 @@ function writeAllUsersToCsv(usersObj) {
   }
 }
 
+// ========================================
+// FUNCIONES DE MENSAJERÍA
+// ========================================
+
+function ensureMensajesCsv() {
+  try {
+    if (!fs.existsSync(MENSAJES_CSV)) {
+      fs.writeFileSync(MENSAJES_CSV, 'id,remitente,destinatario,asunto,contenido,fecha,leido,eliminado_remitente,eliminado_destinatario\n', { encoding: 'utf8' });
+      log('mensajes.csv creado');
+    }
+  } catch (e) { 
+    console.error('Error al asegurar mensajes.csv', e); 
+  }
+}
+
+function loadMensajesFromCsv() {
+  const mensajes = [];
+  try {
+    if (!fs.existsSync(MENSAJES_CSV)) return mensajes;
+    const txt = fs.readFileSync(MENSAJES_CSV, 'utf8');
+    const lines = txt.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      if (i === 0 && line.toLowerCase().startsWith('id')) continue; // header
+      
+      const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Handle commas in quoted fields
+      if (parts.length >= 7) {
+        mensajes.push({
+          id: parseInt(parts[0]) || 0,
+          remitente: parts[1].replace(/"/g, '').trim(),
+          destinatario: parts[2].replace(/"/g, '').trim(),
+          asunto: parts[3].replace(/"/g, '').trim(),
+          contenido: parts[4].replace(/"/g, '').trim(),
+          fecha: parts[5].replace(/"/g, '').trim(),
+          leido: parts[6].replace(/"/g, '').trim() === 'true',
+          eliminado_remitente: parts[7] ? parts[7].replace(/"/g, '').trim() === 'true' : false,
+          eliminado_destinatario: parts[8] ? parts[8].replace(/"/g, '').trim() === 'true' : false
+        });
+      }
+    }
+  } catch (e) { 
+    console.error('Error leyendo mensajes.csv', e); 
+  }
+  return mensajes;
+}
+
+function appendMensajeToCsv(mensaje) {
+  try {
+    const line = `${mensaje.id},${mensaje.remitente},${mensaje.destinatario},"${mensaje.asunto}","${mensaje.contenido}",${mensaje.fecha},${mensaje.leido},false,false\n`;
+    fs.appendFileSync(MENSAJES_CSV, line, { encoding: 'utf8' });
+    log(`Mensaje guardado: ${mensaje.id} de ${mensaje.remitente} a ${mensaje.destinatario}`);
+    return true;
+  } catch (e) {
+    console.error('Error al escribir mensaje en mensajes.csv', e);
+    return false;
+  }
+}
+
+function updateMensajeInCsv(mensajeId, updates) {
+  try {
+    const mensajes = loadMensajesFromCsv();
+    const mensajeIndex = mensajes.findIndex(m => m.id === mensajeId);
+    if (mensajeIndex === -1) return false;
+    
+    // Apply updates
+    Object.assign(mensajes[mensajeIndex], updates);
+    
+    // Rewrite entire file
+    const lines = ['id,remitente,destinatario,asunto,contenido,fecha,leido,eliminado_remitente,eliminado_destinatario'];
+    mensajes.forEach(m => {
+      lines.push(`${m.id},${m.remitente},${m.destinatario},"${m.asunto}","${m.contenido}",${m.fecha},${m.leido},${m.eliminado_remitente},${m.eliminado_destinatario}`);
+    });
+    
+    fs.writeFileSync(MENSAJES_CSV, lines.join('\n') + '\n', { encoding: 'utf8' });
+    return true;
+  } catch (e) {
+    console.error('Error actualizando mensaje en mensajes.csv', e);
+    return false;
+  }
+}
+
+function getNextMensajeId() {
+  try {
+    const mensajes = loadMensajesFromCsv();
+    const maxId = mensajes.reduce((max, m) => Math.max(max, m.id || 0), 0);
+    return maxId + 1;
+  } catch (e) {
+    return 1;
+  }
+}
+
+// Initialize mensajes CSV on server start
+ensureMensajesCsv();
+
 ensureUsersCsv();
 // Al arrancar, si hay contraseñas en texto plano en usuarios.csv, las convertimos a hash bcrypt
 try {
   const usersInitial = loadUsersFromCsv();
   let needRewrite = false;
   Object.keys(usersInitial).forEach(u => {
-    const pw = usersInitial[u] || '';
+    const pw = usersInitial[u].password || '';
     // simple check: bcrypt hashes empiezan con $2a$/$2b$/$2y$
-    if (!pw.startsWith('$2')) {
+    if (pw && typeof pw === 'string' && !pw.startsWith('$2')) {
       const hashed = bcrypt.hashSync(pw, 10);
-      usersInitial[u] = hashed;
+      usersInitial[u].password = hashed;
       needRewrite = true;
     }
   });
   if (needRewrite) {
     // when migrating from two-column to three-column, preserve suspended=false
-    const lines = ['username,password,suspended'];
-    Object.keys(usersInitial).forEach(u => lines.push(`${u},${usersInitial[u]},false`));
+    const lines = ['username,password,suspended,admin'];
+    Object.keys(usersInitial).forEach(u => {
+      const user = usersInitial[u];
+      lines.push(`${u},${user.password},${user.suspended},${user.admin}`);
+    });
     fs.writeFileSync(USERS_CSV, lines.join('\n') + '\n', { encoding: 'utf8' });
     log('Converted plain passwords to bcrypt hashes in usuarios.csv');
   }
 } catch (e) { console.error('Error hashing existing passwords:', e); }
 
 // Clave requerida para permitir registro. Si NO está seteada, el registro público queda DESHABILITADO.
+// Migrar CSV para agregar columna admin si falta
+try {
+  if (fs.existsSync(USERS_CSV)) {
+    const txt = fs.readFileSync(USERS_CSV, 'utf8');
+    const lines = txt.split(/\r?\n/).filter(l => l.length > 0);
+    if (lines.length > 0) {
+      const header = (lines[0] || '').trim().toLowerCase();
+      if (header === 'username,password,suspended') {
+        const out = ['username,password,suspended,admin'];
+        for (let i = 1; i < lines.length; i++) {
+          const raw = (lines[i] || '').trim();
+          if (!raw) continue;
+          const parts = raw.split(',');
+          const u = (parts[0] || '').trim();
+          const pw = (parts[1] || '').trim();
+          const sus = (parts[2] || '').trim();
+          const isAdmin = (u === 'admin' || u === 'Admmin' || u === 'Admin') ? 'true' : 'false';
+          out.push(`${u},${pw},${sus},${isAdmin}`);
+        }
+        fs.writeFileSync(USERS_CSV, out.join('\n') + '\n', { encoding: 'utf8' });
+        log('Migrated usuarios.csv to include admin column');
+      }
+    }
+  }
+} catch (e) {
+  console.error('Error migrating usuarios.csv to add admin column', e);
+}
+
 const REGISTRATION_KEY = process.env.REGISTRATION_KEY || null;
 
 app.post('/login', (req, res) => {
@@ -243,7 +373,7 @@ app.post('/login', (req, res) => {
     if (users[username] && bcrypt.compareSync(password, users[username].password)) {
       // comprobar si el usuario está suspendido
       if (users[username].suspended) return res.status(403).json({ ok: false, error: 'Cuenta suspendida' });
-      return res.json({ ok: true });
+      return res.json({ ok: true, username, admin: !!users[username].admin, suspended: !!users[username].suspended });
     }
 
     return res.status(401).json({ ok: false, error: 'Usuario o contraseña incorrectos' });
@@ -316,8 +446,6 @@ app.get('/login', (req, res) => {
     return res.redirect('/');
   }
 });
-
-// (ruta '/' definida arriba)
 
 // Buscar vehículos de un cliente por ID usando el campo ID_CLIENTE en vehiculos.csv
 app.get('/vehiculos-cliente', (req, res) => {
@@ -459,6 +587,65 @@ app.post('/crear-cliente', (req, res) => {
     return res.status(201).json({ ok: true, id: nextId });
   } catch (err) {
     console.error('Error en /crear-cliente:', err);
+    return res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
+// Actualizar un cliente existente en clientes.csv por id (índice basado en línea)
+app.post('/actualizar-cliente', (req, res) => {
+  try {
+    const { id, nombre, email, telefono } = req.body || {};
+    const idx = parseInt(id, 10);
+    if (!idx || idx <= 0) return res.status(400).json({ ok: false, error: 'Id de cliente inválido' });
+    if (!nombre || !email) return res.status(400).json({ ok: false, error: 'Faltan datos obligatorios' });
+
+    if (!fs.existsSync(CLIENTES_CSV)) return res.status(404).json({ ok: false, error: 'Archivo de clientes no encontrado' });
+    const txt = fs.readFileSync(CLIENTES_CSV, 'utf8');
+    const lines = txt.split(/\r?\n/);
+    if (lines.length <= idx) return res.status(404).json({ ok: false, error: 'Cliente no encontrado' });
+
+    const header = lines[0];
+    const body = lines.slice(1);
+    const bodyIndex = idx - 1;
+    if (bodyIndex < 0 || bodyIndex >= body.length) return res.status(404).json({ ok: false, error: 'Cliente no encontrado' });
+
+    body[bodyIndex] = `${nombre},${email},${telefono || ''}`;
+    const nuevoContenido = [header].concat(body).join('\n');
+    fs.writeFileSync(CLIENTES_CSV, nuevoContenido + (nuevoContenido.endsWith('\n') ? '' : '\n'), { encoding: 'utf8' });
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error('Error en /actualizar-cliente:', e);
+    return res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
+// Borrar un cliente de clientes.csv por id (requiere credenciales admin)
+app.post('/borrar-cliente', (req, res) => {
+  try {
+    const { id, adminUser, adminPass } = req.body || {};
+    const idx = parseInt(id, 10);
+    if (!idx || idx <= 0) return res.status(400).json({ ok: false, error: 'Id de cliente inválido' });
+
+    if (!checkAdminCredentials(adminUser, adminPass)) {
+      return res.status(401).json({ ok: false, error: 'No autorizado' });
+    }
+
+    if (!fs.existsSync(CLIENTES_CSV)) return res.status(404).json({ ok: false, error: 'Archivo de clientes no encontrado' });
+    const txt = fs.readFileSync(CLIENTES_CSV, 'utf8');
+    const lines = txt.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length <= 1) return res.status(404).json({ ok: false, error: 'Cliente no encontrado' });
+
+    const header = lines[0];
+    const body = lines.slice(1);
+    const bodyIndex = idx - 1;
+    if (bodyIndex < 0 || bodyIndex >= body.length) return res.status(404).json({ ok: false, error: 'Cliente no encontrado' });
+
+    body.splice(bodyIndex, 1);
+    const nuevoContenido = [header].concat(body).join('\n');
+    fs.writeFileSync(CLIENTES_CSV, nuevoContenido + (nuevoContenido.endsWith('\n') ? '' : '\n'), { encoding: 'utf8' });
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error('Error en /borrar-cliente:', e);
     return res.status(500).json({ ok: false, error: 'Error interno' });
   }
 });
@@ -622,14 +809,240 @@ app.get('/vehiculos-todos', (req, res) => {
   }
 });
 
+// ========================================
+// EXISTENCIA / PRECIOS DESDE XLS
+// ========================================
+
+app.get('/api/existencia', (req, res) => {
+  try {
+    const codigo = String(req.query.codigo || '').trim();
+    if (!codigo) {
+      return res.status(400).json({ ok: false, error: 'Falta código' });
+    }
+
+    if (!fs.existsSync(EXISTENCIA_XLS)) {
+      return res.status(404).json({ ok: false, error: 'existencia.xls no encontrado' });
+    }
+
+    const wb = XLSX.readFile(EXISTENCIA_XLS);
+    const hoja = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
+
+    // Columnas (0-based): D=3 (descripción), H=7 (precio), J=9 (existencia)
+    let encontrado = null;
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const descripcion = String(row[3] || '').trim();
+      if (!descripcion) continue;
+      
+      // Búsqueda flexible: usa .includes() y convierte a minúsculas.
+      if (descripcion.toLowerCase().includes(codigo.toLowerCase())) {
+        const brutoPrecio = String(row[7] || '').trim();
+        const normalizado = brutoPrecio.replace(/[^0-9,.-]/g, '').replace('.', '').replace(',', '.');
+        const precioNumber = parseFloat(normalizado);
+        const precioUnidad = isNaN(precioNumber) ? 0 : precioNumber;
+        const existencia = String(row[9] || '').trim();
+        // Devolvemos el código original que se buscó y los datos encontrados
+        encontrado = { codigo: codigo, precioUnidad, existencia };
+        break; // Detenerse en la primera coincidencia
+      }
+    }
+
+    if (!encontrado) {
+      return res.json({ ok: true, encontrado: false });
+    }
+
+    return res.json({ ok: true, encontrado: true, data: encontrado });
+  } catch (e) {
+    console.error('Error en /api/existencia:', e);
+    return res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
+app.get('/api/existencia/todos', (req, res) => {
+  try {
+    if (!fs.existsSync(EXISTENCIA_XLS)) {
+      return res.status(404).json({ ok: false, error: 'existencia.xls no encontrado' });
+    }
+
+    const wb = XLSX.readFile(EXISTENCIA_XLS);
+    const hoja = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(hoja);
+
+    return res.json({ ok: true, data: rows });
+  } catch (e) {
+    console.error('Error en /api/existencia/todos:', e);
+    return res.status(500).json({ ok: false, error: 'Error interno' });
+  }
+});
+
+  // ========================================
+  // API DE MENSAJERÍA
+  // ========================================
+
+  // Obtener lista de usuarios disponibles para mensajería
+  app.get('/api/usuarios', (req, res) => {
+    try {
+      const users = loadUsersFromCsv();
+      const usuariosList = Object.keys(users).map(username => ({
+        username,
+        admin: users[username].admin,
+        suspended: users[username].suspended
+      })).filter(u => !u.suspended);
+      
+      res.json(usuariosList);
+    } catch (error) {
+      console.error('Error obteniendo usuarios:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
+  // Enviar un nuevo mensaje
+  app.post('/api/mensajes/enviar', (req, res) => {
+    try {
+      const { remitente, destinatario, asunto, contenido } = req.body || {};
+      
+      if (!remitente || !destinatario || !asunto || !contenido) {
+        return res.status(400).json({ ok: false, error: 'Faltan datos obligatorios' });
+      }
+      
+      // Verificar que ambos usuarios existan
+      const users = loadUsersFromCsv();
+      if (!users[remitente] || !users[destinatario]) {
+        return res.status(400).json({ ok: false, error: 'Usuario remitente o destinatario no válido' });
+      }
+      
+      // Crear nuevo mensaje
+      const nuevoMensaje = {
+        id: getNextMensajeId(),
+        remitente,
+        destinatario,
+        asunto,
+        contenido,
+        fecha: new Date().toISOString(),
+        leido: false
+      };
+      
+      // Guardar mensaje
+      const guardado = appendMensajeToCsv(nuevoMensaje);
+      if (!guardado) {
+        return res.status(500).json({ ok: false, error: 'Error al guardar el mensaje' });
+      }
+      
+      log(`Mensaje enviado: ${remitente} -> ${destinatario} (${nuevoMensaje.id})`);
+      res.json({ ok: true, mensajeId: nuevoMensaje.id });
+      
+    } catch (error) {
+      console.error('Error enviando mensaje:', error);
+      res.status(500).json({ ok: false, error: 'Error interno del servidor' });
+    }
+  });
+
+  // Obtener mensajes recibidos de un usuario
+  app.post('/api/mensajes/recibidos', (req, res) => {
+    try {
+      const { username } = req.body || {};
+      
+      if (!username) {
+        return res.status(400).json({ error: 'Falta nombre de usuario' });
+      }
+      
+      const todosMensajes = loadMensajesFromCsv();
+      const recibidos = todosMensajes
+        .filter(m => m.destinatario === username && !m.eliminado_destinatario)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      
+      res.json(recibidos);
+    } catch (error) {
+      console.error('Error obteniendo mensajes recibidos:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
+  // Obtener mensajes enviados de un usuario
+  app.post('/api/mensajes/enviados', (req, res) => {
+    try {
+      const { username } = req.body || {};
+      
+      if (!username) {
+        return res.status(400).json({ error: 'Falta nombre de usuario' });
+      }
+      
+      const todosMensajes = loadMensajesFromCsv();
+      const enviados = todosMensajes
+        .filter(m => m.remitente === username && !m.eliminado_remitente)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      
+      res.json(enviados);
+    } catch (error) {
+      console.error('Error obteniendo mensajes enviados:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
+  // Marcar mensaje como leído
+  app.post('/api/mensajes/marcar-leido', (req, res) => {
+    try {
+      const { mensajeId } = req.body || {};
+      
+      if (!mensajeId) {
+        return res.status(400).json({ error: 'Falta ID del mensaje' });
+      }
+      
+      const actualizado = updateMensajeInCsv(parseInt(mensajeId), { leido: true });
+      
+      if (actualizado) {
+        log(`Mensaje marcado como leído: ${mensajeId}`);
+        res.json({ ok: true });
+      } else {
+        res.status(404).json({ error: 'Mensaje no encontrado' });
+      }
+      
+    } catch (error) {
+      console.error('Error marcando mensaje como leído:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
+  // Eliminar mensaje (para remitente o destinatario)
+  app.post('/api/mensajes/eliminar', (req, res) => {
+    try {
+      const { mensajeId, tipo } = req.body || {};
+      
+      if (!mensajeId || !tipo) {
+        return res.status(400).json({ error: 'Faltan datos obligatorios' });
+      }
+      
+      const updates = {};
+      if (tipo === 'recibido') {
+        updates.eliminado_destinatario = true;
+      } else if (tipo === 'enviado') {
+        updates.eliminado_remitente = true;
+      } else {
+        return res.status(400).json({ error: 'Tipo de mensaje no válido' });
+      }
+      
+      const actualizado = updateMensajeInCsv(parseInt(mensajeId), updates);
+      
+      if (actualizado) {
+        log(`Mensaje eliminado (${tipo}): ${mensajeId}`);
+        res.json({ ok: true });
+      } else {
+        res.status(404).json({ error: 'Mensaje no encontrado' });
+      }
+      
+    } catch (error) {
+      console.error('Error eliminando mensaje:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
     // ADMIN APIs: require adminUser/adminPass in body to authorize actions
     function checkAdminCredentials(adminUser, adminPass) {
       const users = loadUsersFromCsv();
-      const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-      const allowedAdminNames = new Set([ADMIN_USERNAME, 'admin', 'Admmin', 'Admin']);
       if (!adminUser || !adminPass) return false;
-      if (!allowedAdminNames.has(adminUser)) return false;
       if (!users[adminUser]) return false;
+      if (!users[adminUser].admin) return false;
       return bcrypt.compareSync(adminPass, users[adminUser].password);
     }
 
@@ -643,30 +1056,31 @@ app.get('/vehiculos-todos', (req, res) => {
       const { adminUser, adminPass } = req.body || {};
       if (!checkAdminCredentials(adminUser, adminPass)) return res.status(401).json({ ok: false, error: 'No autorizado' });
       const users = loadUsersFromCsv();
-      const list = Object.keys(users).map(u => ({ username: u, suspended: users[u].suspended }));
+      const list = Object.keys(users).map(u => ({ username: u, suspended: users[u].suspended, admin: !!users[u].admin }));
       return res.json({ ok: true, users: list });
     });
 
     app.post('/admin/create', (req, res) => {
-      const { adminUser, adminPass, username, password } = req.body || {};
+      const { adminUser, adminPass, username, password, admin } = req.body || {};
       if (!checkAdminCredentials(adminUser, adminPass)) return res.status(401).json({ ok: false, error: 'No autorizado' });
       if (!username || !password) return res.status(400).json({ ok: false, error: 'Faltan datos' });
       const users = loadUsersFromCsv();
       if (users[username]) return res.status(409).json({ ok: false, error: 'Usuario ya existe' });
       const hashed = bcrypt.hashSync(password, 10);
-      const ok = appendUserToCsv(username, hashed, false);
+      const ok = appendUserToCsv(username, hashed, false, !!admin);
       if (!ok) return res.status(500).json({ ok: false, error: 'No se pudo crear usuario' });
       return res.status(201).json({ ok: true });
     });
 
     app.post('/admin/update', (req, res) => {
-      const { adminUser, adminPass, username, password, suspended } = req.body || {};
+      const { adminUser, adminPass, username, password, suspended, admin } = req.body || {};
       if (!checkAdminCredentials(adminUser, adminPass)) return res.status(401).json({ ok: false, error: 'No autorizado' });
       if (!username) return res.status(400).json({ ok: false, error: 'Falta username' });
       const users = loadUsersFromCsv();
       if (!users[username]) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
       if (password) users[username].password = bcrypt.hashSync(password, 10);
       if (typeof suspended === 'boolean') users[username].suspended = suspended;
+      if (typeof admin === 'boolean') users[username].admin = admin;
       const ok = writeAllUsersToCsv(users);
       if (!ok) return res.status(500).json({ ok: false, error: 'No se pudo actualizar usuario' });
       return res.json({ ok: true });

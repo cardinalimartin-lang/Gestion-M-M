@@ -3,29 +3,203 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inicio</title>
+  <title>Panel principal - M&amp;M</title>
   <link rel="stylesheet" href="login.css" />
+  <link rel="stylesheet" href="mensajes.css" />
 </head>
-<body>
-  <div class="page-wrapper">
-    <div class="left-panel">
-      <div class="brand">
+<body class="dashboard-body">
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <div class="brand brand-small">
         <h1>M&amp;M</h1>
-        <p class="tag">Panel principal</p>
+        <p class="tag">Gestión de clientes y vehículos</p>
       </div>
-      <div class="card login-card" style="max-width:520px">
-        <div class="action-row" style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap">
-          <a class="action-btn primary" style="padding:12px 20px; font-size:1.05rem" href="presupuesto/Presupuesto.html">Presupuesto</a>
-          <a class="action-btn primary" style="padding:12px 20px; font-size:1.05rem" href="/clientes/clientes.html">Clientes</a>
-          <a class="action-btn primary" style="padding:12px 20px; font-size:1.05rem" href="/Vehiculos/vehiculos.html">Vehículos</a>
+      <div class="breadcrumbs" id="breadcrumbs">Inicio</div>
+    </div>
+    <div class="top-bar-right">
+      <div class="global-actions">
+        <button type="button" class="icon-btn" title="Buscar" aria-label="Buscar">
+          🔍
+        </button>
+        <button type="button" class="icon-btn" title="Mensajes" aria-label="Mensajes" onclick="abrirMensajeria()">
+          ✉️
+        </button>
+        <button type="button" class="icon-btn" title="Ayuda" aria-label="Ayuda">
+          ?
+        </button>
+      </div>
+      <div class="user-info" id="userInfo">
+        <span>Usuario: <strong id="userNameLabel">Invitado</strong></span>
+        <span id="userTimeLabel" style="margin-left:12px; font-size: 0.9em; opacity:0.9;">--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-layout">
+    <aside class="sidebar-left">
+      <nav class="sidebar-nav">
+        <button type="button" class="sidebar-item active" data-view="inicio">
+          <span class="sidebar-icon">🏠</span>
+          <span class="sidebar-label">Inicio</span>
+        </button>
+        <button type="button" class="sidebar-item" data-view="presupuesto">
+          <span class="sidebar-icon">📄</span>
+          <span class="sidebar-label">Presupuesto</span>
+        </button>
+        <button type="button" class="sidebar-item" data-view="clientes">
+          <span class="sidebar-icon">👥</span>
+          <span class="sidebar-label">Clientes</span>
+        </button>
+        <button type="button" class="sidebar-item" data-view="vehiculos">
+          <span class="sidebar-icon">🚗</span>
+          <span class="sidebar-label">Vehículos</span>
+        </button>
+        <button type="button" class="sidebar-item" data-view="reportes">
+          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-label">Reportes</span>
+        </button>
+        <button type="button" class="sidebar-item" data-view="admin" id="adminMenuItem" style="display:none">
+          <span class="sidebar-icon">🛠️</span>
+          <span class="sidebar-label">Administración</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="sidebar-item sidebar-logout" id="logoutBtn">
+          <span class="sidebar-icon">⏻</span>
+          <span class="sidebar-label">Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <section class="content-area">
+      <div id="welcomeView" class="welcome-view">
+        <h2>Bienvenido al panel M&amp;M</h2>
+        <p>Seleccioná una opción del menú para comenzar.</p>
+        <div class="quick-actions">
+          <button type="button" class="primary" data-view="presupuesto">Ir a Presupuesto</button>
+          <button type="button" class="secondary" data-view="clientes">Ir a Clientes</button>
+          <button type="button" class="secondary" data-view="vehiculos">Ir a Vehículos</button>
+        </div>
+      </div>
+      <div id="iframeContainer" class="iframe-container" style="display:none">
+        <iframe id="workFrame" title="Área de trabajo" src="" frameborder="0"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de Ayuda -->
+  <div id="helpModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Sistema de Presupuestador – Empresa M&M</h2>
+        <button class="modal-close" id="closeHelpModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="help-section">
+          <h3>Funcionalidades principales</h3>
+          <ul>
+            <li>Gestión de presupuestos de productos y repuestos para vehículos</li>
+            <li>Administración de clientes y vehículos</li>
+            <li>Sistema de autenticación de usuarios</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Componentes técnicos</h3>
+          <ul>
+            <li>Frontend: HTML, CSS y JavaScript vanilla con interfaz moderna</li>
+            <li>Backend: Node.js para gestión de datos</li>
+            <li>Gestión de datos: Archivos CSV con información de clientes, presupuestos, inventario y productos (códigos, descripciones, marcas, modelos)</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Módulos específicos</h3>
+          <ul>
+            <li>Presupuesto: Catálogo de productos con códigos, descripciones y precios</li>
+            <li>Clientes: Base de datos de clientes</li>
+            <li>Vehículos: Control de información de vehículos</li>
+            <li>Administración: Panel principal con navegación entre módulos</li>
+          </ul>
+        </div>
+        
+        <div class="help-section">
+          <h3>Finalidad</h3>
+          <p>El sistema permite a la empresa M&M crear presupuestos personalizados, gestionar inventario de repuestos automotrices y mantener registros completos de clientes y vehículos.</p>
         </div>
       </div>
     </div>
-    <div class="right-panel">
-      <div class="hero">
-        <!-- imagen decorativa -->
+  </div>
+
+  <!-- Mensajería Modal -->
+  <div id="mensajesModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Mensajería</h2>
+        <button class="modal-close" id="closeMensajesModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="messages-tabs">
+          <button class="tab-button active" data-tab="nuevo">Nuevo Mensaje</button>
+          <button class="tab-button" data-tab="recibidos">Recibidos</button>
+          <button class="tab-button" data-tab="enviados">Enviados</button>
+        </div>
+        <div class="tab-content">
+          <!-- Pestaña Nuevo Mensaje -->
+          <div id="nuevoTab" class="tab-pane active">
+            <form id="formMensaje" class="message-form">
+              <div class="form-group">
+                <label for="destinatario">Para:</label>
+                <select id="destinatario" required>
+                  <option value="">Seleccionar destinatario</option>
+                  <!-- Los usuarios se cargarán dinámicamente -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="asunto">Asunto:</label>
+                <input type="text" id="asunto" required>
+              </div>
+              <div class="form-group">
+                <label for="mensaje">Mensaje:</label>
+                <textarea id="mensaje" rows="5" required></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-enviar">Enviar Mensaje</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Pestaña Mensajes Recibidos -->
+          <div id="recibidosTab" class="tab-pane">
+            <div class="messages-filters">
+              <input type="text" id="buscarRecibidos" placeholder="Buscar por remitente, asunto o texto...">
+              <select id="filtroEstadoRecibidos">
+                <option value="todos">Todos</option>
+                <option value="no-leidos">No leídos</option>
+                <option value="leidos">Leídos</option>
+              </select>
+            </div>
+            <div class="messages-list" id="listaRecibidos">
+              <div class="empty-state">No hay mensajes recibidos</div>
+            </div>
+          </div>
+
+          <!-- Pestaña Mensajes Enviados -->
+          <div id="enviadosTab" class="tab-pane">
+            <div class="messages-filters">
+              <input type="text" id="buscarEnviados" placeholder="Buscar por destinatario, asunto o texto...">
+            </div>
+            <div class="messages-list" id="listaEnviados">
+              <div class="empty-state">No hay mensajes enviados</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <script src="auth-utils.js"></script>
+  <script src="mensajes.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>

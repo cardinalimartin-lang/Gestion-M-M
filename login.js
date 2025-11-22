@@ -1,6 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
 
+    // Si la página se abrió como archivo local (file:///), redirigimos automáticamente
+    // al backend en http://localhost:3000/, que ya sabe servir login.html en la raíz.
+    // Esto restaura el comportamiento "doble click y termina en localhost:3000".
+    try {
+        if (location.protocol === 'file:' || !location.protocol) {
+            window.location.href = 'http://localhost:3000/';
+            return; // detenemos el resto del script en este contexto
+        }
+    } catch (e) {
+        // Si algo falla al leer location, no hacemos nada especial
+    }
+
     // limpiar campos al cargar (y desactivar autocomplete) — el usuario quiere siempre los campos limpios
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -40,11 +52,39 @@ document.addEventListener('DOMContentLoaded', function() {
             if (res.ok) {
                 const data = await res.json();
                 if (data.ok) {
+                    // Guardar información básica de sesión reutilizable en todo el frontend
+                    try {
+                        sessionStorage.removeItem('currentUser');
+                        sessionStorage.removeItem('adminUser');
+                        sessionStorage.removeItem('adminPass');
+
+                        const isAdmin = !!data.admin;
+                        const sessionPayload = {
+                            username: data.username || username,
+                            admin: isAdmin,
+                            suspended: !!data.suspended
+                        };
+                        sessionStorage.setItem('currentUser', JSON.stringify(sessionPayload));
+
+                        // Para acciones que requieren credenciales admin fuertes (borrar cliente, etc.)
+                        if (isAdmin) {
+                            sessionStorage.setItem('adminUser', username);
+                            sessionStorage.setItem('adminPass', password);
+                        }
+                    } catch (_) {}
+
                     // Redirigir a la app (si usamos Live Server, apiBase apunta al backend)
                     // limpiar campos antes de redirigir
                     if (usernameInput) usernameInput.value = '';
                     if (passwordInput) passwordInput.value = '';
-                    const redirectUrl = (typeof apiBase === 'string' && apiBase) ? `${apiBase}/home` : '/home';
+
+                    let redirectUrl = '/home';
+                    if (typeof apiBase === 'string' && apiBase) {
+                        const params = new URLSearchParams();
+                        params.set('username', sessionPayload.username);
+                        params.set('admin', String(isAdmin ? 1 : 0));
+                        redirectUrl = `${apiBase}/home?${params.toString()}`;
+                    }
 
                     // debug console
                     try { console.debug('Redirecting to', redirectUrl); } catch (e) {}
@@ -87,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // guardar credenciales temporalmente en sessionStorage para la UI de admin
                     sessionStorage.setItem('adminUser', adminUser);
                     sessionStorage.setItem('adminPass', adminPass);
-                    // abrir la página de administración
-                    window.location.href = '/Presupuestador/admin.html';
+                    // abrir el dashboard en modo administración
+                    window.location.href = 'home.html?view=admin';
                     return;
                 }
                 const b = await res.json().catch(()=>({}));

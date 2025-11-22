@@ -25,7 +25,10 @@
                     <input type="email" id="correo" name="correo">
                 </div>
                 <div class="form-actions">
-                    <button type="submit" id="btn-guardar">GUARDAR CLIENTE</button>
+                    <button type="submit" id="btn-guardar" class="btn">GUARDAR CLIENTE</button>
+                    <button type="button" id="btn-editar" class="btn">EDITAR</button>
+                    <button type="button" id="btn-borrar" class="btn">BORRAR</button>
+                    <input type="hidden" id="cliente-id" name="clienteId" value="">
                 </div>
             </form>
         </div>
@@ -43,7 +46,34 @@
             </table>
         </div>
     </div>
+
+    <!-- Modal para edición de cliente -->
+    <div id="modal-editar-cliente" class="modal-overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-editar-titulo">
+            <h3 id="modal-editar-titulo">Editar cliente</h3>
+            <form id="form-editar-cliente">
+                <div class="campo">
+                    <label for="modal-nombre">Nombre completo:</label>
+                    <input type="text" id="modal-nombre" name="nombre" required>
+                </div>
+                <div class="campo">
+                    <label for="modal-telefono">Teléfono:</label>
+                    <input type="tel" id="modal-telefono" name="telefono">
+                </div>
+                <div class="campo">
+                    <label for="modal-correo">Correo electrónico:</label>
+                    <input type="email" id="modal-correo" name="correo">
+                </div>
+                <input type="hidden" id="modal-cliente-id" name="clienteId" value="">
+                <div class="modal-actions">
+                    <button type="button" id="modal-cancelar" class="btn">Cancelar</button>
+                    <button type="submit" id="modal-guardar" class="btn">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
+    <script src="../auth-utils.js"></script>
     <script src="clientes.js"></script>
 </body>
 </html>

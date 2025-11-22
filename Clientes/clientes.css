@@ -41,11 +41,12 @@ body {
     gap: 15px; /* Espacio entre los campos */
 }
 
-/* Acciones del formulario (contiene el botón) alineadas a la derecha */
+/* Acciones del formulario (contiene los botones) alineadas y con espacio uniforme */
 .form-actions {
     flex: 1 1 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
+    gap: 10px;
     margin-top: 8px;
 }
 
@@ -111,21 +112,43 @@ input[type="text"], input[type="tel"], input[type="email"], input[type="number"]
     color: #009900;
 }
 
-#btn-guardar {
-    padding: 15px 30px;
-    background-color: #4CAF50; /* Color verde */
-    color: white;
-    border: none;
+.btn {
+    padding: 10px 20px;
     border-radius: 5px;
+    border: none;
     cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin-left: auto; /* Empuja el botón hacia la derecha */
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+#btn-guardar {
+    background-color: #22c55e; /* Verde */
 }
 
 #btn-guardar:hover {
-    background-color: #45a049;
+    background-color: #16a34a;
+}
+
+#btn-editar {
+    background-color: #3b82f6; /* Azul */
+}
+
+#btn-editar:hover {
+    background-color: #2563eb;
+}
+
+#btn-borrar {
+    background-color: #ef4444; /* Rojo */
+}
+
+#btn-borrar:hover {
+    background-color: #dc2626;
 }
 
 /* Listado de clientes */
@@ -153,6 +176,51 @@ input[type="text"], input[type="tel"], input[type="email"], input[type="number"]
 
 .tabla-clientes tbody tr:nth-child(even) {
     background: #fafafa;
+}
+
+.tabla-clientes tbody tr {
+    cursor: pointer;
+}
+
+.fila-seleccionada {
+    background-color: #dbeafe !important; /* Azul claro para fila seleccionada */
+}
+
+/* Estilos para el modal de edición de cliente */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.visible {
+    display: flex;
+}
+
+.modal {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    width: 100%;
+    max-width: 420px;
+}
+
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #111827;
+}
+
+.modal .modal-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 /* Media Query para pantallas pequeñas */
