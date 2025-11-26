@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link rel="stylesheet" href="clientes.css">
+</head>
+<body>
+    <div class="contenedor-principal">
+        
+        <div class="seccion-superior">
+            <h2>Información Personal del Cliente</h2>
+            <form id="formulario-cliente">
+                <div class="campo">
+                    <label for="nombre">Nombre completo:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="campo">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono">
+                </div>
+                <div class="campo">
+                    <label for="correo">Correo electrónico:</label>
+                    <input type="email" id="correo" name="correo">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="btn-guardar" class="btn">GUARDAR CLIENTE</button>
+                    <button type="button" id="btn-editar" class="btn">EDITAR</button>
+                    <button type="button" id="btn-borrar" class="btn">BORRAR</button>
+                    <input type="hidden" id="cliente-id" name="clienteId" value="">
+                </div>
+            </form>
+        </div>
+
+        <div class="lista-clientes">
+            <table class="tabla-clientes" aria-label="Listado de clientes">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-clientes"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para edición de cliente -->
+    <div id="modal-editar-cliente" class="modal-overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-editar-titulo">
+            <h3 id="modal-editar-titulo">Editar cliente</h3>
+            <form id="form-editar-cliente">
+                <div class="campo">
+                    <label for="modal-nombre">Nombre completo:</label>
+                    <input type="text" id="modal-nombre" name="nombre" required>
+                </div>
+                <div class="campo">
+                    <label for="modal-telefono">Teléfono:</label>
+                    <input type="tel" id="modal-telefono" name="telefono">
+                </div>
+                <div class="campo">
+                    <label for="modal-correo">Correo electrónico:</label>
+                    <input type="email" id="modal-correo" name="correo">
+                </div>
+                <input type="hidden" id="modal-cliente-id" name="clienteId" value="">
+                <div class="modal-actions">
+                    <button type="button" id="modal-cancelar" class="btn">Cancelar</button>
+                    <button type="submit" id="modal-guardar" class="btn">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../auth-utils.js"></script>
+    <script src="clientes.js"></script>
+</body>
+</html>
