@@ -229,3 +229,34 @@
 [2025-11-22T03:55:55.588Z] Servidor escuchando en 3000
 [2025-11-26T04:48:25.505Z] Iniciando servidor PID=11308
 [2025-11-26T04:48:25.520Z] Servidor escuchando en 3000
+[2025-11-26T05:05:37.595Z] Iniciando servidor PID=11812
+[2025-11-26T05:05:37.609Z] Servidor escuchando en 3000
+[2025-11-26T17:35:04.052Z] Iniciando servidor PID=15796
+[2025-11-26T17:35:04.071Z] Servidor escuchando en 3000
+[2025-11-27T02:11:33.073Z] Iniciando servidor PID=11780
+[2025-11-27T02:11:33.088Z] Servidor escuchando en 3000
+[2025-11-27T05:29:49.734Z] Iniciando servidor PID=14916
+[2025-11-27T05:29:49.752Z] Servidor escuchando en 3000
+[2025-11-27T05:36:59.452Z] Iniciando servidor PID=5024
+[2025-11-27T05:36:59.466Z] Servidor escuchando en 3000
+[2025-11-27T05:45:12.980Z] Iniciando servidor PID=11480
+[2025-11-27T05:45:12.995Z] Servidor escuchando en 3000
+[2025-11-27T06:03:06.573Z] Iniciando servidor PID=6628
+[2025-11-27T06:03:06.588Z] Servidor escuchando en 3000
+[2025-11-27T06:36:58.517Z] Iniciando servidor PID=7520
+[2025-11-27T06:36:58.539Z] Servidor escuchando en 3000
+[2025-11-27T07:20:26.977Z] Iniciando servidor PID=14732
+[2025-11-27T07:20:26.991Z] uncaughtException: Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at node:net:2206:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[2025-11-27T07:37:41.627Z] Iniciando servidor PID=18304
+[2025-11-27T07:37:41.644Z] Servidor escuchando en 3000
+[2025-11-27T07:54:02.929Z] Iniciando servidor PID=14052
+[2025-11-27T07:54:02.945Z] Servidor escuchando en 3000
+[2025-11-27T09:56:33.806Z] Iniciando servidor PID=21572
+[2025-11-27T09:56:33.825Z] Servidor escuchando en 3000
+[2025-11-27T10:03:07.075Z] Usuario creado: Nacho
+[2025-11-28T04:00:08.555Z] Iniciando servidor PID=16960
+[2025-11-28T04:00:08.581Z] Servidor escuchando en 3000

@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const cantFiltroAceite = document.getElementById('cant-filtro-aceite');
     const cantFiltroAire = document.getElementById('cant-filtro-aire');
-    const cantFiltroFComb = document.getElementById('cant-filtro-fcombustible');
+    const cantFiltroCombustible = document.getElementById('cant-filtro-fcombustible');
     const cantFiltroHabitaculo = document.getElementById('cant-filtro-habitaculo');
 
     const precioFiltroAceite = document.getElementById('precio-filtro-aceite');
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
             existFiltroAceite, existFiltroAire, existFiltroFComb, existFiltroHabitaculo
         ].forEach(el => { if (el) el.textContent = ''; });
 
-        [cantFiltroAceite, cantFiltroAire, cantFiltroFComb, cantFiltroHabitaculo].forEach(input => {
+        [cantFiltroAceite, cantFiltroAire, cantFiltroCombustible, cantFiltroHabitaculo].forEach(input => {
             if (input) input.value = 1;
         });
         actualizarSubtotalFiltros();
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
             case 'fcombustible':
                 return {
-                    cant: cantFiltroFComb,
+                    cant: cantFiltroCombustible,
                     precio: precioFiltroFComb,
                     total: totalFiltroFComb,
                     exist: existFiltroFComb
@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         cantFiltroAceite.addEventListener('input', () => actualizarTotalLinea(cantFiltroAceite, precioFiltroAceite, totalFiltroAceite));
         cantFiltroAire.addEventListener('input', () => actualizarTotalLinea(cantFiltroAire, precioFiltroAire, totalFiltroAire));
-        cantFiltroFComb.addEventListener('input', () => actualizarTotalLinea(cantFiltroFComb, precioFiltroFComb, totalFiltroFComb));
+        cantFiltroCombustible.addEventListener('input', () => actualizarTotalLinea(cantFiltroCombustible, precioFiltroFComb, totalFiltroFComb));
         cantFiltroHabitaculo.addEventListener('input', () => actualizarTotalLinea(cantFiltroHabitaculo, precioFiltroHabitaculo, totalFiltroHabitaculo));
 
         if (tablaFiltrosVehiculo) {

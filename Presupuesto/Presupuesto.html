@@ -184,14 +184,26 @@
           <tbody>
             <tr>
               <td id="codigo-aceite-1"></td>
-              <td id="detalle-aceite-1"></td>
+              <td>
+                <select id="select-detalle-aceite-1" class="combobox">
+                  <option value="">Seleccione Detalle</option>
+                  <option value="opcion1">Opción 1</option>
+                  <option value="opcion2">Opción 2</option>
+                </select>
+              </td>
               <td><input id="cant-aceite-1" type="number" min="1" value="1" style="max-width: 48px;" /></td>
               <td id="precio-aceite-1"></td>
               <td id="total-aceite-1"></td>
             </tr>
             <tr>
               <td id="codigo-aceite-2"></td>
-              <td id="detalle-aceite-2"></td>
+              <td>
+                <select id="select-detalle-aceite-2" class="combobox">
+                  <option value="">Seleccione Detalle</option>
+                  <option value="opcion1">Opción 1</option>
+                  <option value="opcion2">Opción 2</option>
+                </select>
+              </td>
               <td><input id="cant-aceite-2" type="number" min="1" value="1" style="max-width: 48px;" /></td>
               <td id="precio-aceite-2"></td>
               <td id="total-aceite-2"></td>
@@ -242,6 +254,7 @@
   </div>
   <!-- Agregar el script de la aplicación -->
   <script src="index.js"></script>
+  <script src="aceites.js"></script>
 </body>
 
 </html>
