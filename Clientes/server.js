@@ -938,6 +938,64 @@ app.get('/api/aceites', (req, res) => {
   }
 });
 
+// ========================================
+// API DE COMPLEMENTOS
+// ========================================
+
+// Obtener lista de complementos filtrados
+app.get('/api/complementos', (req, res) => {
+  try {
+    if (!fs.existsSync(EXISTENCIA_XLS)) {
+      return res.status(404).json({ ok: false, error: 'existencia.xls no encontrado' });
+    }
+
+    const wb = XLSX.readFile(EXISTENCIA_XLS);
+    const hoja = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
+
+    // Encontrar índices de columnas
+    const headerRow = rows[2]; // Los encabezados están en la fila 3 (0-based)
+    const rubroIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === 'Rubro');
+    const descripcionIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === 'Descripción');
+    const skuIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === 'SKU');
+    const precioIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === 'Precio de venta');
+
+    // Verificar que se encontraron todas las columnas necesarias
+    if (rubroIndex === -1 || descripcionIndex === -1 || skuIndex === -1 || precioIndex === -1) {
+      console.error('No se encontraron todas las columnas necesarias en el archivo Excel');
+      console.log('Encabezados encontrados:', headerRow);
+      return res.status(500).json({ 
+        ok: false, 
+        error: 'Estructura de archivo incorrecta',
+        headers: headerRow
+      });
+    }
+
+    const complementos = rows.slice(3) // Empezar desde la fila 4 (0-based)
+      .filter(row => {
+        const rubro = row[rubroIndex] || '';
+        return rubro.includes('13-LUBR-Lubricantes');
+      })
+      .map(row => {
+        const precioCrudo = row[precioIndex] || '0';
+        const precioLimpio = String(precioCrudo).replace(/[^0-9,.]/g, '').replace(/\./g, '').replace(',', '.');
+        const precioNumerico = parseFloat(precioLimpio) || 0;
+
+        return {
+          codigo: row[skuIndex] || '',
+          descripcion: row[descripcionIndex] || '',
+          precio: precioNumerico
+        };
+      })
+      .filter(item => item.codigo && item.descripcion);
+
+    return res.json({ ok: true, data: complementos });
+  } catch (error) {
+    console.error('Error en /api/complementos:', error);
+    return res.status(500).json({ ok: false, error: 'Error al leer el archivo de existencia' });
+  }
+});
+
   // ========================================
   // API DE MENSAJERÍA
   // ========================================
